@@ -55,7 +55,7 @@ type Job interface {
 	WriteMetaData()
 	// WriteResults([]byte) error
 
-	// WaitForRunCompletion must wait until all job is completed.
+	// WaitForRunCompletion must wait until the job is completed.
 	WaitForRunCompletion()
 
 	// Decrement Run Waitgroup

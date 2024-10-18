@@ -247,6 +247,18 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 			DB:             rh.DB,
 			DoneChan:       rh.MessageQueue.JobDone,
 		}
+
+	case "subporcess":
+		j = &jobs.SubprocessJob{
+			UUID:           jobID,
+			ProcessName:    processID,
+			Submitter:      submitter,
+			Cmd:            cmd,
+			ProcessVersion: p.Info.Version,
+			StorageSvc:     rh.StorageSvc,
+			DB:             rh.DB,
+			DoneChan:       rh.MessageQueue.JobDone,
+		}
 	}
 
 	// Create job
