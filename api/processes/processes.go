@@ -204,18 +204,20 @@ func LoadProcesses(dir string) (ProcessList, error) {
 		return pl, err
 	}
 	allYamls := append(ymls, yamls...)
-	processes := make([]Process, len(allYamls))
+	processes := make([]Process, 0)
 
-	for i, y := range allYamls {
+	for _, y := range allYamls {
 		p, err := MarshallProcess(y)
 		if err != nil {
 			log.Errorf("could not register process %s Error: %v", filepath.Base(y), err)
+			continue
 		}
 		err = p.Validate()
 		if err != nil {
 			log.Errorf("could not register process %s Error: %v", filepath.Base(y), err.Error())
+			continue
 		}
-		processes[i] = p
+		processes = append(processes, p)
 	}
 
 	infos := make([]Info, len(processes))
@@ -226,7 +228,7 @@ func LoadProcesses(dir string) (ProcessList, error) {
 	pl.List = processes
 	pl.InfoList = infos
 
-	return pl, err
+	return pl, nil
 }
 
 // Validate checks if the Process has all required fields properly set.
