@@ -1,0 +1,25 @@
+info:
+  version: '0.0.1'
+  id: exampleCmd
+  title: Example Command Process
+  description: This process runs a simple command-line task using the cmd type.
+  jobControlOptions:
+    - async-execute
+  outputTransmission:
+    - reference
+
+host:
+  type: subprocess
+
+container:
+  command:
+    - echo
+    - Hello World
+
+outputs:
+  - id: output1
+    title: Output 1
+    inputId: outputDestination
+    output:
+      transmissionMode:
+        - reference

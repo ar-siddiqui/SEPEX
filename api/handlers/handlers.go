@@ -248,7 +248,7 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 			DoneChan:       rh.MessageQueue.JobDone,
 		}
 
-	case "subporcess":
+	case "subprocess":
 		j = &jobs.SubprocessJob{
 			UUID:           jobID,
 			ProcessName:    processID,

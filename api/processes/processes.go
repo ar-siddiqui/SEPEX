@@ -266,8 +266,8 @@ func (p *Process) Validate() error {
 	}
 
 	// Validate Host Type
-	if p.Host.Type != "local" && p.Host.Type != "aws-batch" {
-		return errors.New("host type must be 'local' or 'aws-batch'")
+	if p.Host.Type != "local" && p.Host.Type != "aws-batch" && p.Host.Type != "subprocess" {
+		return errors.New("host type must be 'local' or 'aws-batch' or 'subprocess'")
 	}
 
 	// Validate Container Image (if applicable)
