@@ -32,7 +32,7 @@ type SubprocessJob struct {
 	UpdateTime     time.Time
 	Status         string `json:"status"`
 
-	cmdProcess *exec.Cmd
+	execCmd *exec.Cmd
 
 	logger  *log.Logger
 	logFile *os.File
@@ -196,8 +196,8 @@ func (j *SubprocessJob) Run() {
 	}()
 
 	// Prepare the command
-	j.cmdProcess = exec.CommandContext(j.ctx, j.Cmd[0], j.Cmd[1:]...)
-	j.cmdProcess.Env = append(os.Environ(), j.EnvVars...)
+	j.execCmd = exec.CommandContext(j.ctx, j.Cmd[0], j.Cmd[1:]...)
+	j.execCmd.Env = append(os.Environ(), j.EnvVars...)
 
 	// Create a new file or overwrite if it exists
 	logFile, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
@@ -209,17 +209,17 @@ func (j *SubprocessJob) Run() {
 	defer logFile.Close()
 
 	// Redirect stdout and stderr to the log file
-	j.cmdProcess.Stdout = logFile
-	j.cmdProcess.Stderr = logFile
+	j.execCmd.Stdout = logFile
+	j.execCmd.Stderr = logFile
 
 	// Start the command
-	err = j.cmdProcess.Start()
+	err = j.execCmd.Start()
 	if err != nil {
 		j.logger.Errorf("Failed to start subprocess. Error: %s", err.Error())
 		j.NewStatusUpdate(FAILED, time.Time{})
 		return
 	}
-	j.PID = fmt.Sprintf("%d", j.cmdProcess.Process.Pid)
+	j.PID = fmt.Sprintf("%d", j.execCmd.Process.Pid)
 	j.NewStatusUpdate(RUNNING, time.Time{})
 
 	if isCancelled() {
@@ -227,7 +227,7 @@ func (j *SubprocessJob) Run() {
 	}
 
 	// Wait for the process to finish
-	err = j.cmdProcess.Wait()
+	err = j.execCmd.Wait()
 	if err != nil {
 		if j.CurrentStatus() == DISMISSED {
 			return
@@ -305,12 +305,14 @@ func (j *SubprocessJob) Close() {
 	// to do: add panic recover to remove job from active jobs even if following panics
 	j.ctxCancel() // Signal Run function to terminate if running
 
-	if j.PID != "" { // Process related cleanups if process exists
-		err := j.cmdProcess.Process.Kill()
-		if err != nil {
-			j.logger.Errorf("Could not kill process. Error: %s", err.Error())
-		}
-	}
+	// Following is not needed since we are using context to signal job termination
+	// if j.execCmd.Process != nil && j.execCmd.ProcessState == nil {
+	// 	// Process related cleanups if process state is nil meaning process is still running
+	// 	err := j.execCmd.Process.Kill()
+	// 	if err != nil {
+	// 		j.logger.Errorf("Could not kill process. Error: %s", err.Error())
+	// 	}
+	// }
 
 	j.DoneChan <- j // At this point job can be safely removed from active jobs
 
