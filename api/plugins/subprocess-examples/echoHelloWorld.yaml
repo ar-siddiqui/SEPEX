@@ -1,8 +1,8 @@
 info:
   version: '0.0.1'
-  id: exampleCmd
-  title: Example Command Process
-  description: This process runs a simple command-line task using the cmd type.
+  id: echoHelloWorld
+  title: Echo Hello World
+  description: This process runs a simple command-line task i.e. echo Hello World.
   jobControlOptions:
     - async-execute
   outputTransmission:
