@@ -289,7 +289,7 @@ func (j *DockerJob) Run() {
 	// wait for process to finish
 	exitCode, err := c.ContainerWait(j.ctx, j.ContainerID)
 	if err != nil {
-
+		// to do: check what would happen if container exited because of dismiss signal and hanlde it similar to subprocess_job
 		j.logger.Errorf("Failed waiting for container to finish. Error: %s", err.Error())
 		j.NewStatusUpdate(FAILED, time.Time{})
 		return

@@ -229,9 +229,13 @@ func (j *SubprocessJob) Run() {
 	// Wait for the process to finish
 	err = j.cmdProcess.Wait()
 	if err != nil {
-		j.logger.Errorf("Subprocess failure. Error: %s", err.Error())
-		j.NewStatusUpdate(FAILED, time.Time{})
-		return
+		if j.CurrentStatus() == DISMISSED {
+			return
+		} else {
+			j.logger.Errorf("Subprocess failure. Error: %s", err.Error())
+			j.NewStatusUpdate(FAILED, time.Time{})
+			return
+		}
 	}
 
 	j.logger.Info("Subprocess finished successfully.")
@@ -302,7 +306,10 @@ func (j *SubprocessJob) Close() {
 	j.ctxCancel() // Signal Run function to terminate if running
 
 	if j.PID != "" { // Process related cleanups if process exists
-		j.cmdProcess.Process.Kill()
+		err := j.cmdProcess.Process.Kill()
+		if err != nil {
+			j.logger.Errorf("Could not kill process. Error: %s", err.Error())
+		}
 	}
 
 	j.DoneChan <- j // At this point job can be safely removed from active jobs
