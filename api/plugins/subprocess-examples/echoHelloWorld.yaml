@@ -11,10 +11,9 @@ info:
 host:
   type: subprocess
 
-container:
-  command:
-    - echo
-    - Hello World
+command:
+  - echo
+  - Hello World
 
 outputs:
   - id: output1
