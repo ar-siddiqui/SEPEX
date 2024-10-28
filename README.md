@@ -45,7 +45,7 @@ The API is the main orchestrator for all the downstream functionality and a sing
 
 ### Processes
 ![](imgs/readme/processes.png)
-Processes are computational tasks described through a configuration file that can be executed in a container. Each configuration file contains information about the process such as the title of this process, its description, execution mode, execution resources, secrets required, inputs, and outputs. Each config file is to be unmarshalled to register a process in the API. These processes then can be called several times by the users to run jobs.
+Processes are computational tasks described through a configuration file that can be executed as a subprocess or in a container. Each configuration file contains information about the process such as the title of this process, its description, execution mode, execution resources, secrets required, inputs, and outputs. Each config file is to be unmarshalled to register a process in the API. These processes then can be called several times by the users to run jobs.
 
 
 ### Jobs
@@ -68,11 +68,13 @@ At the start of the app, all the `.yaml` `.yml` (configuration) files are read a
 
 Cloud processes are executed on the cloud using a workload management service. AWS Batch was chosen as the provider for its wide user base. Cloud processes must specify the provider type, job definition, job queue, and job name. The API will submit a request to run the job to the AWS Batch API directly.
 
-The containerized processes must expect a JSON load as the last argument of the entrypoint command and write results as the last log message in the format `{"plugin_results": results}`. It is the responsibility of the process to write these results correctly if the process succeeds. The API will store logs of the container and will try to parse the last log for results when the client requests results for jobs.
+Subprocess based processes are executed natively using an OS subprocess call.
 
-When a job is submitted, a local container is fired up immediately for sync jobs, and a job request is submitted to the AWS batch for async jobs. When a local job reaches a finished state (successful or failed), the local container is removed. Similarly, if an active job is explicitly dismissed using DEL route, the job is terminated, and resources are freed up. If the server is gracefully shut down, all currently active jobs are terminated, and resources are freed up.
+All processes must expect a JSON load as the last argument of the command and write results as the last log message in the format `{"plugin_results": results}`. It is the responsibility of the process to write these results correctly if the process succeeds. The API will store logs of the container and will try to parse the last log for results when the client requests results for jobs.
 
-The API responds to all GET requests (except `/jobs/<jobID>/results`) as HTML or JSON depending upon if the request is being originated from Browser or not or if it specifies the format using query parameter ‘f’.
+When a local job (docker or subprocess) reaches a finished state (successful or failed), the artifacts of the jobs such as container is removed. Similarly, if an active job is explicitly dismissed using DEL route, the job is terminated, and resources are freed up. If the server is gracefully shut down, all currently active jobs are terminated, and resources are freed up.
+
+The API responds to all GET requests as HTML or JSON depending upon if the request is being originated from Browser or not or if it specifies the format using query parameter ‘f’.
 
 ### Logs
 ![](imgs/readme/logs.png)

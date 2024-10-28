@@ -516,7 +516,7 @@ func (rh *RESTHandler) JobLogsHandler(c echo.Context) (err error) {
 			return prepareResponse(c, http.StatusBadRequest, "error", output)
 		}
 
-		_ = (*job).UpdateContainerLogs()
+		_ = (*job).UpdateProcessLogs()
 	} else if jRcrd, ok, err = rh.DB.GetJob(jobID); ok { // db hit
 		pid = jRcrd.ProcessID
 		status = jRcrd.Status
@@ -690,7 +690,7 @@ func (rh *RESTHandler) JobStatusUpdateHandler(c echo.Context) error {
 
 // func (rh *RESTHandler) JobResultsUpdateHandler(c echo.Context) error {
 
-// 	// setup some kind of token/auth to allow only the container to post to this route
+// 	// setup some kind of token/auth to allow only the trusted clients to post to this route
 
 // 	defer c.Request().Body.Close()
 // 	dataBytes, err := io.ReadAll(c.Request().Body)

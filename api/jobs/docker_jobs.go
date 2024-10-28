@@ -72,7 +72,7 @@ func (j *DockerJob) IMAGE() string {
 }
 
 // Update container logs
-func (j *DockerJob) UpdateContainerLogs() (err error) {
+func (j *DockerJob) UpdateProcessLogs() (err error) {
 	// If old status is one of the terminated status, close has already been called and container logs fetched, container killed
 	switch j.Status {
 	case SUCCESSFUL, DISMISSED, FAILED:
@@ -91,7 +91,7 @@ func (j *DockerJob) UpdateContainerLogs() (err error) {
 	}
 
 	// Create a new file or overwrite if it exists
-	file, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
+	file, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
 	if err != nil {
 		return
 	}
@@ -173,7 +173,7 @@ func (j *DockerJob) Equals(job Job) bool {
 
 func (j *DockerJob) initLogger() error {
 	// Create a place holder file for container logs
-	file, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
+	file, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %s", err.Error())
 	}
@@ -425,9 +425,9 @@ func (j *DockerJob) Close() {
 				j.logger.Errorf("Could not fetch container logs. Error: %s", err.Error())
 			}
 
-			file, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
+			file, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
 			if err != nil {
-				j.logger.Errorf("Could not create container logs file. Error: %s", err.Error())
+				j.logger.Errorf("Could not create process logs file. Error: %s", err.Error())
 				return
 			}
 

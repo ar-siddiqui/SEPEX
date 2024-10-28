@@ -125,7 +125,7 @@ func (j *SubprocessJob) Equals(job Job) bool {
 
 func (j *SubprocessJob) initLogger() error {
 	// Create a place holder file for subprocess logs
-	file, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
+	file, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %s", err.Error())
 	}
@@ -200,7 +200,7 @@ func (j *SubprocessJob) Run() {
 	j.execCmd.Env = append(os.Environ(), j.EnvVars...)
 
 	// Create a new file or overwrite if it exists
-	logFile, err := os.Create(fmt.Sprintf("%s/%s.container.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
+	logFile, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))
 	if err != nil {
 		j.logger.Errorf("Failed to create log file: %s", err.Error())
 		j.NewStatusUpdate(FAILED, time.Time{})
@@ -333,6 +333,6 @@ func (j *SubprocessJob) IMAGE() string {
 	return ""
 }
 
-func (j *SubprocessJob) UpdateContainerLogs() (err error) {
+func (j *SubprocessJob) UpdateProcessLogs() (err error) {
 	return nil
 }
