@@ -4,7 +4,7 @@
 [![E2E Tests](https://github.com/dewberry/process-api/actions/workflows/e2e-tests.yml/badge.svg?event=push)](https://github.com/Dewberry/process-api/actions/workflows/e2e-tests.yml)
 [![Update Sequence Diagrams Wiki](https://github.com/Dewberry/process-api/actions/workflows/update-squence-wiki.yml/badge.svg)](https://github.com/Dewberry/process-api/actions/workflows/update-squence-wiki.yml)
 
-A lightweight, extensible, OGC compliant Process API for local and cloud based containerized processing.
+A lightweight, extensible, OGC-API Processes compliant API for local and cloud based task processing.
 
 For more information on the specification visit the [OGC API - Processes - Part 1: Core](https://docs.ogc.org/is/18-062r2/18-062r2.html#toc0).
 
@@ -64,7 +64,7 @@ Execution platforms are hosts that can provide resources to run a job. The This 
 
 ![](imgs/readme/design.svg)
 
-At the start of the app, all the `.yaml` `.yml` (configuration) files are read and processes are registered. Each file describes what resources the process requires and where it wants to be executed. There are two execution platforms available; local processes run in a docker container, hence they must specify a docker image and the tag. The API will download these images from the repository and then run them on the host machine. Commands specified will be appended to the entrypoint of the container. The API responds to the request of local processes synchronously.
+At the start of the app, all the `.yaml` `.yml` (configuration) files are read and processes are registered. Each file describes what resources the process requires and where it wants to be executed. There are three execution platforms available; docker processes run in a docker container, hence they must specify a docker image and the tag. The API will download these images from the repository and then run them on the host machine. Commands specified will be appended to the entrypoint of the container. The API responds to the request of local processes synchronously.
 
 Cloud processes are executed on the cloud using a workload management service. AWS Batch was chosen as the provider for its wide user base. Cloud processes must specify the provider type, job definition, job queue, and job name. The API will submit a request to run the job to the AWS Batch API directly.
 

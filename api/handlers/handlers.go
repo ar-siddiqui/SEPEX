@@ -194,10 +194,10 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 	}
 
 	var cmd []string
-	if p.Container.Command == nil {
+	if p.Command == nil {
 		cmd = []string{string(jsonParams)}
 	} else {
-		cmd = append(p.Container.Command, string(jsonParams))
+		cmd = append(p.Command, string(jsonParams))
 	}
 
 	mode := p.Info.JobControlOptions[0]
@@ -208,7 +208,7 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 	jobID := uuid.New().String()
 
 	// switch host {
-	// case "local":
+	// case "docker":
 	// 	params.Inputs["resultsCallbackUri"] = fmt.Sprintf("%s/jobs/%s/results_update", os.Getenv("API_URL_LOCAL"), jobID)
 	// default:
 	// 	params.Inputs["resultsCallbackUri"] = fmt.Sprintf("%s/jobs/%s/results_update", os.Getenv("API_URL_PUBLIC"), jobID)
@@ -217,15 +217,15 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 	submitter := c.Request().Header.Get("X-ProcessAPI-User-Email")
 	var j jobs.Job
 	switch host {
-	case "local":
+	case "docker":
 		j = &jobs.DockerJob{
 			UUID:           jobID,
 			ProcessName:    processID,
 			ProcessVersion: p.Info.Version,
-			Image:          p.Container.Image,
+			Image:          p.Host.Image,
 			Submitter:      submitter,
-			EnvVars:        p.Container.EnvVars,
-			Resources:      jobs.Resources(p.Container.Resources),
+			EnvVars:        p.Config.EnvVars,
+			Resources:      jobs.Resources(p.Config.Resources),
 			Cmd:            cmd,
 			StorageSvc:     rh.StorageSvc,
 			DB:             rh.DB,
@@ -236,7 +236,7 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 		j = &jobs.AWSBatchJob{
 			UUID:           jobID,
 			ProcessName:    processID,
-			Image:          p.Container.Image,
+			Image:          p.Host.Image,
 			Submitter:      submitter,
 			Cmd:            cmd,
 			JobDef:         p.Host.JobDefinition,
