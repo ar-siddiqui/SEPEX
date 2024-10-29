@@ -20,6 +20,8 @@
 - Requests from Admin Role are allowed to retrieve all jobs information, non admins can only retrieve information for jobs that they submitted.
 - Only admins can add/update/delete processes.
 
+## Inputs
+- If `"Inputs": {}` in `/execution` payload. Nothing will be appended to process commands. This allow running processes that do not have any inputs.
 
 ## Scope
 - The behavior of logging is unknown for AWS Batch processes with job definitions having number of attempts more than 1.
