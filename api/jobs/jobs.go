@@ -221,7 +221,7 @@ func FetchLogs(svc *s3.S3, jid string, onlyContainer bool) (JobLogs, error) {
 		target *[]LogEntry
 	}{
 		{
-			"container",
+			"process",
 			&result.ProcessLogs,
 		},
 		{

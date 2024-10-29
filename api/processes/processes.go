@@ -266,13 +266,13 @@ func (p *Process) Validate() error {
 	}
 
 	// Validate Host Type
-	if p.Host.Type != "local" && p.Host.Type != "aws-batch" && p.Host.Type != "subprocess" {
-		return errors.New("host type must be 'local' or 'aws-batch' or 'subprocess'")
+	if p.Host.Type != "docker" && p.Host.Type != "aws-batch" && p.Host.Type != "subprocess" {
+		return errors.New("host type must be 'docker' or 'aws-batch' or 'subprocess'")
 	}
 
 	// Validate Container Image (if applicable)
-	if p.Host.Type == "local" && p.Host.Image == "" {
-		return errors.New("container image is required for local host type")
+	if p.Host.Type == "docker" && p.Host.Image == "" {
+		return errors.New("container image is required for docker host type")
 	}
 
 	// Validate AWS data (if applicable)
