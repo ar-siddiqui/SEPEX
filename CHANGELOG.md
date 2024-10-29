@@ -21,5 +21,6 @@ Notes: During development phase, expect breaking API and YAML schema changes dur
 
 ### Documentation
 - A `CHANGELOG.md` file is added in the repo.
+- Process templates are provided for all three host types in `./process_templates` folder
 
 ## 0.1.0
