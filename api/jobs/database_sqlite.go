@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
 	log "github.com/sirupsen/logrus"
+	_ "modernc.org/sqlite"
 )
 
 type SQLiteDB struct {
@@ -27,7 +27,7 @@ func NewSQLiteDB(dbPath string) (*SQLiteDB, error) {
 		return nil, err
 	}
 
-	h, err := sql.Open("sqlite3", dbPath+"?mode=rwc")
+	h, err := sql.Open("sqlite", dbPath+"?mode=rwc")
 	// it maybe a good idea to check here if the connections has write privilege https://stackoverflow.com/a/44707371/11428410 https://www.sqlite.org/c3ref/db_readonly.html
 	// also maybe we should make db such that only go can write to it
 
