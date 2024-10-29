@@ -15,6 +15,8 @@ https://developer.ogc.org/api/processes/index.html
 
 ## Getting Started
 
+### Linux using Docker
+
 1. Create docker network `docker network create process_api_net`
 
 1. Build docker images for example plugins
@@ -25,14 +27,21 @@ chmod +x build.sh &&
 ```
 1. Create a `.env` file (example below) at the root of this repo.
 ![](imgs/readme/getting-started.gif)
-1. Add process configuration file(s) (yaml) to the [plugins](plugins/) directory
-1. run `docker compose up`
+1. Add/Delete process configuration file(s) (yaml) to the [plugins](plugins/) directory as needed
+1. Run `docker compose up`
 1. Create a bucket in the minio console (http://localhost:9001).
 1. Test endpoints using the swagger documentation page. (http://localhost:5050/swagger/index.html)
 
 ![](imgs/readme/swagger-demo.gif)
 
-*API docs created using [swaggo](https://github.com/swaggo/swag)*
+### Windows
+*`docker` and `aws-batch` jobs have not been tested yet on Windows*
+
+1. Download and run MinIO https://min.io/docs/minio/windows/index.html
+2. In a separate command prompt window, CD into api folder. Run `cd api`
+3. Build API by running `go build -o papi.exe main.go`
+4. Create a `.env` file (example below). Update paths in the env file as needed.
+5. Run API by `papi -e .env`
 
 ---
 
@@ -89,4 +98,5 @@ Similar to logs, metadata is not included in the OGC-API Processes specification
 An env file is required and should be available at the root of this repository (`./.env`). See the [example.env](example.env) for a guide.
 
 ## Notes
-*NOTE: This server was adapted for ogc-compliance from an existing api developed by @albrazeau*
+1. This server was adapted for ogc-compliance from an existing api developed by @albrazeau
+2. API docs created using [swaggo](https://github.com/swaggo/swag)
