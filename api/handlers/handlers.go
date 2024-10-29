@@ -193,11 +193,14 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errResponse{Message: err.Error()})
 	}
 
-	var cmd []string
-	if p.Command == nil {
-		cmd = []string{string(jsonParams)}
-	} else {
-		cmd = append(p.Command, string(jsonParams))
+	// If `"Inputs": {}` in `/execution` payload. Nothing will be appended to process commands.
+	// This allow running processes that do not have any inputs.
+	var cmd = []string{}
+	if p.Command != nil {
+		cmd = append(cmd, p.Command...)
+	}
+	if string(jsonParams) != "{}" {
+		cmd = append(cmd, string(jsonParams))
 	}
 
 	mode := p.Info.JobControlOptions[0]
