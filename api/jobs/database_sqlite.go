@@ -27,10 +27,11 @@ func NewSQLiteDB(dbPath string) (*SQLiteDB, error) {
 		return nil, err
 	}
 
-	h, err := sql.Open("sqlite", dbPath+"?mode=rwc&_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)")
+	h, err := sql.Open("sqlite", dbPath+"?mode=rwc&_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)&_pragma=busy_timeout(5000)")
 	// Set WAL mode (not strictly necessary each time because it's persisted in the database).
 	// Set busy timeout, so concurrent writers wait on each other instead of erroring immediately,
 	// this is per connection setting so necessary each time
+	// Set sync mode to normal which is completely safe in WAL and can speed up concurrency
 	// It maybe a good idea to make db such that only go can write to it.
 
 	if err != nil {
