@@ -37,11 +37,12 @@ chmod +x build.sh &&
 ### Windows
 *`docker` and `aws-batch` jobs have not been tested yet on Windows*
 
-1. Download and run MinIO https://min.io/docs/minio/windows/index.html
-2. In a separate command prompt window, CD into api folder. Run `cd api`
-3. Build API by running `go build -o papi.exe main.go`
-4. Create a `.env` file (example below). Update paths in the env file as needed.
-5. Run API by `papi -e .env`
+1. Create a `.env` file (example below). Update paths in the env file as needed.
+2. Download and run MinIO https://min.io/docs/minio/windows/index.html
+3. Create a bucket in MinIO Web console
+4. In a separate command prompt window, CD into api folder. Run `cd api`
+5. Build API by running `go build -o papi.exe main.go`
+6. Run API by `papi -e ../.env`
 
 ---
 
