@@ -1,4 +1,4 @@
-# SEPEX - System for Encapsulated Processes Execution
+# SEPEX - Service for Encapsulated Processes Execution
 
 [![Container CI](https://github.com/Dewberry/process-api/actions/workflows/container-ci.yml/badge.svg)](https://github.com/Dewberry/process-api/actions/workflows/container-ci.yml)
 [![E2E Tests](https://github.com/Dewberry/process-api/actions/workflows/e2e-tests.yml/badge.svg?event=push)](https://github.com/Dewberry/process-api/actions/workflows/e2e-tests.yml)
