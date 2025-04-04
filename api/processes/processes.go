@@ -131,9 +131,13 @@ func (p Process) VerifyInputs(inp map[string]interface{}) error {
 	return nil
 }
 
-func (p Process) VerifyLocalEnvars(container Config) error {
+func (p Process) VerifyLocalEnvars() error {
 	var missingEnvVars []string
-	for _, envVar := range container.EnvVars {
+	for _, envVar := range p.Config.EnvVars {
+		// check all env vars start with process id
+		if !strings.HasPrefix(envVar, strings.ToUpper(p.Info.ID)) {
+			return fmt.Errorf("error: env variable %s does not start with %s", envVar, strings.ToUpper(p.Info.ID))
+		}
 		if os.Getenv(envVar) == "" {
 			missingEnvVars = append(missingEnvVars, envVar)
 		}
@@ -184,8 +188,8 @@ func MarshallProcess(f string) (Process, error) {
 			return Process{}, err
 		}
 		p.Host.Image = jdi.Image
-		p.Config.Resources.Memory = jdi.Memory
-		p.Config.Resources.CPUs = jdi.VCPUs
+		p.Config.Resources.Memory = jdi.Memory // although we are fetching this information but is not being used anywhere or reported to users
+		p.Config.Resources.CPUs = jdi.VCPUs    // although we are fetching this information but is not being used anywhere or reported to users
 	}
 
 	return p, nil

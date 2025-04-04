@@ -74,12 +74,6 @@ func (c *DockerController) ContainerRun(ctx context.Context, image string, comma
 	}
 
 	hostConfig.Mounts = mounts
-	envs := make([]string, len(envVars))
-	var i int
-	for k, v := range envVars {
-		envs[i] = k + "=" + v
-		i++
-	}
 
 	err := createDockerNetwork(c.cli, ctx, DOCKER_NETWORK)
 	if err != nil {
@@ -98,7 +92,7 @@ func (c *DockerController) ContainerRun(ctx context.Context, image string, comma
 		Tty:   true,
 		Image: image,
 		Cmd:   command,
-		Env:   envs,
+		Env:   envVars,
 	}, &hostConfig, netConfig, nil, "")
 	// log.Info("Container Create response", resp)
 	if err != nil {

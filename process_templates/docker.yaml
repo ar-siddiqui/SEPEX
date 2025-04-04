@@ -34,7 +34,8 @@ config:
     cpus: 0.1
     # memory in megabytes
     memory: 1024
-  # env variable keys that need to be passed to container, for AWS_ACCESS_KEY_ID etc
+  # env variable keys that need to be passed to container, for AEPGRID_AWS_ACCESS_KEY_ID etc
+  # they would be passed to the container with prefix AEPGRID_ removed
   envVars:
     - variable1
     - variable2

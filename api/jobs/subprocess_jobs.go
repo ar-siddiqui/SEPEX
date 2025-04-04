@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 
@@ -197,7 +198,14 @@ func (j *SubprocessJob) Run() {
 
 	// Prepare the command
 	j.execCmd = exec.CommandContext(j.ctx, j.Cmd[0], j.Cmd[1:]...)
-	j.execCmd.Env = append(os.Environ(), j.EnvVars...)
+
+	envs := make([]string, len(j.EnvVars))
+	for i, k := range j.EnvVars {
+		name := strings.TrimPrefix(k, strings.ToUpper(j.ProcessName)+"_")
+		envs[i] = name + "=" + os.Getenv(k)
+	}
+	j.execCmd.Env = envs
+	j.logger.Debugf("Registered %v env vars", len(envs))
 
 	// Create a new file or overwrite if it exists
 	logFile, err := os.Create(fmt.Sprintf("%s/%s.process.jsonl", os.Getenv("TMP_JOB_LOGS_DIR"), j.UUID))

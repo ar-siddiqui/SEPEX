@@ -47,7 +47,7 @@ type AWSBatchJob struct {
 
 	// Job Name in Batch for this job
 	JobName                string `json:"jobName"`
-	EnvVars                map[string]string
+	EnvVars                []string
 	batchContext           *controllers.AWSBatchController
 	logStreamName          string
 	cloudWatchForwardToken string
@@ -231,7 +231,15 @@ func (j *AWSBatchJob) Create() error {
 		return err
 	}
 
-	aWSBatchID, err := batchContext.JobCreate(j.ctx, j.JobDef, j.JobName, j.JobQueue, j.Cmd, j.EnvVars)
+	// get environment variables
+	envs := make(map[string]string, len(j.EnvVars))
+	for _, k := range j.EnvVars {
+		name := strings.TrimPrefix(k, strings.ToUpper(j.ProcessName)+"_")
+		envs[name] = os.Getenv(k)
+	}
+	j.logger.Debugf("Registered %v env vars", len(envs))
+
+	aWSBatchID, err := batchContext.JobCreate(j.ctx, j.JobDef, j.JobName, j.JobQueue, j.Cmd, envs)
 	if err != nil {
 		j.ctxCancel()
 		return err

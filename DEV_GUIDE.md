@@ -8,6 +8,10 @@
     - Environment variable
     - Default value, where available
 
+## Process Sepcific Env
+- They must start with ALL CAPS process id.
+- They will be passed to jobs with porcess id prefix removed. This allow setting 3rd party env variables such as GDAL_NUM_CPUS etc.
+- We are parsing at the job level so as to allow dynamic updates withouth having to restart server
 
 ## Auth
 - If auth is enabled some or all routes are protected based on env variable `AUTH_LEVEL` settings.
