@@ -4,10 +4,12 @@ package processes
 
 import (
 	"app/controllers"
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/labstack/gommon/log"
 	"gopkg.in/yaml.v3"
@@ -17,7 +19,7 @@ type Process struct {
 	Info    Info      `yaml:"info" json:"info"`
 	Host    Host      `yaml:"host" json:"host"`
 	Command []string  `yaml:"command" json:"command,omitempty"`
-	Config  Config    `yaml:"config" json:"cofig"`
+	Config  Config    `yaml:"config" json:"config"`
 	Inputs  []Inputs  `yaml:"inputs" json:"inputs"`
 	Outputs []Outputs `yaml:"outputs" json:"outputs"`
 }
@@ -87,6 +89,7 @@ type Host struct {
 
 type Config struct {
 	EnvVars   []string  `yaml:"envVars" json:"envVars,omitempty"`
+	Volumes   []string  `yaml:"volumes" json:"volumes,omitempty"`
 	Resources Resources `yaml:"maxResources" json:"maxResources,omitempty"`
 }
 
@@ -144,6 +147,40 @@ func (p Process) VerifyLocalEnvars() error {
 	}
 	if len(missingEnvVars) > 0 {
 		return fmt.Errorf("error: env variables not found: %v. please restart the server with these in place", missingEnvVars)
+	}
+	return nil
+}
+
+// EnsureLocalVolumes checks if the local volumes exist and creates them if not.
+// It validates each volume specification and ensures the host path is a directory.
+func (p Process) EnsureLocalVolumes() (err error) {
+	for _, volumeSpec := range p.Config.Volumes {
+		// Split volume specification into source path and container path (if present)
+		parts := strings.Split(volumeSpec, ":")
+		if len(parts) != 2 {
+			return fmt.Errorf("invalid volume specification %q: missing source path", volumeSpec)
+		}
+		srcPath := strings.TrimSpace(parts[0])
+		if srcPath == "" {
+			return fmt.Errorf("invalid volume specification %q: empty source path", volumeSpec)
+		}
+
+		info, err := os.Stat(srcPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				if err := os.MkdirAll(srcPath, 0755); err != nil {
+					return fmt.Errorf("error creating source volume directory %s: %w", srcPath, err)
+				}
+				continue
+			}
+			// Handle other errors (e.g., permission issues)
+			return fmt.Errorf("error checking source volume directory %s: %w", srcPath, err)
+		}
+
+		// Ensure existing path is a directory
+		if !info.IsDir() {
+			return fmt.Errorf("source volume path %s exists but is not a directory", srcPath)
+		}
 	}
 	return nil
 }
@@ -269,6 +306,8 @@ func (p *Process) Validate() error {
 		}
 	}
 
+	// to do: use CASE: here to do each validation for right hosts
+
 	// Validate Host Type
 	if p.Host.Type != "docker" && p.Host.Type != "aws-batch" && p.Host.Type != "subprocess" {
 		return errors.New("host type must be 'docker' or 'aws-batch' or 'subprocess'")
@@ -282,6 +321,26 @@ func (p *Process) Validate() error {
 	// Validate AWS data (if applicable)
 	if p.Host.Type == "aws-batch" && (p.Host.JobQueue == "" || p.Host.JobDefinition == "") {
 		return errors.New("job information is required for aws-batch host type")
+	}
+
+	// Validate Environment Variables available
+	if err := p.VerifyLocalEnvars(); err != nil {
+		return fmt.Errorf("error: %v", err)
+	}
+
+	// Validate Host Volume could be created or exist
+	if p.Host.Type == "docker" {
+		c, err := controllers.NewDockerController()
+		if err != nil {
+			return fmt.Errorf("error: %v", err)
+		}
+		if err := c.EnsureImage(context.TODO(), p.Host.Image, false); err != nil {
+			return fmt.Errorf("error: %v", err)
+		}
+
+		if err := p.EnsureLocalVolumes(); err != nil {
+			return fmt.Errorf("error: %v", err)
+		}
 	}
 
 	// Validate Inputs

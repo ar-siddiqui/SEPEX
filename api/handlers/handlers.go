@@ -96,8 +96,7 @@ func prepareResponse(c echo.Context, httpStatus int, renderName string, output i
 // runRequestBody provides the required inputs for containerized processes
 // specs: https://developer.ogc.org/api/processes/index.html#tag/Execute
 type runRequestBody struct {
-	Inputs  map[string]interface{} `json:"inputs"`
-	EnvVars map[string]string      `json:"environmentVariables"`
+	Inputs map[string]interface{} `json:"inputs"`
 }
 
 // LandingPage godoc
@@ -228,6 +227,7 @@ func (rh *RESTHandler) Execution(c echo.Context) error {
 			Image:          p.Host.Image,
 			Submitter:      submitter,
 			EnvVars:        p.Config.EnvVars,
+			Volumes:        p.Config.Volumes,
 			Resources:      jobs.Resources(p.Config.Resources),
 			Cmd:            cmd,
 			StorageSvc:     rh.StorageSvc,

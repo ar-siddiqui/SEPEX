@@ -39,6 +39,9 @@ config:
   envVars:
     - variable1
     - variable2
+  # If source volume does not exist it will be created
+  volumes:
+    - ./data/aepGrid:/data
 
 # inputs user must provide
 inputs:

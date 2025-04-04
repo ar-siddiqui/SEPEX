@@ -39,6 +39,8 @@ config:
   envVars:
     - variable1
     - variable2
+  # not implemented for `subprocess` host
+  # volumes:
 
 # inputs user must provide
 inputs:

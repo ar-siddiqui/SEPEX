@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,6 +31,7 @@ type DockerJob struct {
 	ProcessVersion string `json:"processVersion"`
 	Submitter      string
 	EnvVars        []string
+	Volumes        []string `json:"volumes"`
 	Cmd            []string `json:"commandOverride"`
 	UpdateTime     time.Time
 	Status         string `json:"status"`
@@ -253,17 +255,26 @@ func (j *DockerJob) Run() {
 		return
 	}
 
-	// get environment variables
-	envVars := map[string]string{}
-	for _, eVar := range j.EnvVars {
-		envVars[eVar] = os.Getenv(eVar)
+	err = c.EnsureImage(j.ctx, j.Image, false)
+	if err != nil {
+		j.logger.Infof("Could not ensure image %s available", j.Image)
+		j.NewStatusUpdate(FAILED, time.Time{})
+		return
 	}
 
-	j.logger.Infof("Registered %v env vars", len(envVars))
+	// get environment variables
+	envs := make([]string, len(j.EnvVars))
+	for i, k := range j.EnvVars {
+		name := strings.TrimPrefix(k, strings.ToUpper(j.ProcessName)+"_")
+		envs[i] = name + "=" + os.Getenv(k)
+	}
+	j.logger.Debugf("Registered %v env vars", len(envs))
+
 	resources := controllers.DockerResources{}
 	resources.NanoCPUs = int64(j.Resources.CPUs * 1e9)         // Docker controller needs cpu in nano ints
 	resources.Memory = int64(j.Resources.Memory * 1024 * 1024) // Docker controller needs memory in bytes
 
+	// although we have already checked if image is available at the time of process init, we are doing it again just to be explicit
 	err = c.EnsureImage(j.ctx, j.Image, false)
 	if err != nil {
 		j.logger.Infof("Could not ensure image %s available", j.Image)
@@ -272,7 +283,7 @@ func (j *DockerJob) Run() {
 	}
 
 	// start container
-	containerID, err := c.ContainerRun(j.ctx, j.Image, j.Cmd, []controllers.VolumeMount{}, envVars, resources)
+	containerID, err := c.ContainerRun(j.ctx, j.Image, j.Cmd, j.Volumes, envs, resources)
 	if err != nil {
 		j.logger.Errorf("Failed to run container. Error: %s", err.Error())
 		j.NewStatusUpdate(FAILED, time.Time{})
@@ -338,7 +349,7 @@ func (j *DockerJob) WriteMetaData() {
 	}
 
 	p := process{j.ProcessID(), j.ProcessVersionID()}
-	imageDigest, err := c.GetImageDigest(j.IMAGE())
+	imageDigest, err := c.GetImageDigest(j.IMAGE()) // what if image is update between start of job and this call?
 	if err != nil {
 		j.logger.Errorf("Error getting Image Digest: %s", err.Error())
 		return

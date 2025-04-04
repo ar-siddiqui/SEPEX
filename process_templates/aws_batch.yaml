@@ -39,7 +39,8 @@ config:
   # could be defined here or in Batch job definition or both
   # they would be passed to the container with prefix AEPGRID_ removed
   envVars:
-
+  # not implemented for `aws-batch` job, should be defined in Batch job definition
+  # volumes:
 
 # inputs user must provide
 inputs:
